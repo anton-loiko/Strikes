@@ -1,0 +1,82 @@
+# Unreal Engine 5 specific
+
+# Binaries
+/Binaries/
+/Build/
+/DerivedDataCache/
+/Intermediate/
+/Saved/
+/.vscode/
+/*.suo
+/*.user
+/*.userosscache
+/*.sln
+/*.suo
+/*.swp
+/*.swo
+
+# Config
+*.config
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# JetBrains Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Compiled source
+*.pdb
+*.opendb
+*.idb
+
+# Unreal Engine settings
+*.tmp
+*.log
+*.suo
+*.user
+*.userprefs
+
+# Additional generated files
+*.pch
+*.obj
+*.lib
+*.dll
+*.exe
+
+# Local build artifacts
+*.d
+*.dmp
+*.cache
+*.ncb
+*.suo
+*.tlog
+*.vcxproj
+*.vscode/
+
+# Unreal Engine specific builds
+*.xcodeproj
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+
+# Miscellaneous
+*.sdf
+*.suo
+*.tmp
+*.pdb
+*.ipch
+*.iobj
+*.iobj
+*.log
+*.lnt
+*.un~ 
