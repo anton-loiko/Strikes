@@ -78,6 +78,13 @@ bool UTP_WeaponComponent::AttachWeapon(AStrikesCharacter* TargetCharacter)
 {
 	Character = TargetCharacter;
 
+	if (Character)
+	{
+		// Subscribe to the overheat event
+		Character->OnOverheat.AddDynamic(this, &UTP_WeaponComponent::OnOverheatEvent);
+	}
+
+
 	// Check that the character is valid, and has no weapon component yet
 	if (Character == nullptr || Character->GetInstanceComponents().FindItemByClass<UTP_WeaponComponent>())
 	{
@@ -114,17 +121,52 @@ bool UTP_WeaponComponent::AttachWeapon(AStrikesCharacter* TargetCharacter)
 
 void UTP_WeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	// Check if the character is valid before proceeding.
 	if (Character == nullptr)
 	{
 		return;
 	}
 
+	// Attempt to retrieve the PlayerController from the character.
 	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
 	{
+		// Attempt to retrieve the EnhancedInputLocalPlayerSubsystem from the PlayerController's local player.
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<
 			UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
+			// Remove the input mapping context to clean up input bindings.
 			Subsystem->RemoveMappingContext(FireMappingContext);
 		}
 	}
+}
+
+
+void UTP_WeaponComponent::SetOverheat(const bool bOverheat)
+{
+	// Check if the character is valid before proceeding.
+	if (!Character)
+	{
+		return;
+	}
+
+	// Retrieve all child components of the character's mesh.
+	TArray<USceneComponent*> ChildComponents;
+	Character->GetMesh1P()->GetChildrenComponents(true, ChildComponents);
+
+	// Check if the first child component is a skeletal mesh component.
+	if (USkeletalMeshComponent* GunComponent = Cast<USkeletalMeshComponent>(ChildComponents[0]))
+	{
+		// Set the material of the mesh based on whether the weapon is overheating.
+		GunComponent->SetMaterial(
+			0,
+			bOverheat ? Character->GunOverheatMaterial : Character->GunDefaultMaterial
+		);
+	}
+}
+
+
+void UTP_WeaponComponent::OnOverheatEvent(bool bOverheat)
+{
+	// Handle the overheat event by updating the weapon's material.
+	SetOverheat(bOverheat);
 }
