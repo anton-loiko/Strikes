@@ -35,7 +35,7 @@ AStrikesCharacter::AStrikesCharacter()
 	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
 	Mesh1P->bCastDynamicShadow = false;
 	Mesh1P->CastShadow = false;
-	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
+	Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 }
 
@@ -185,10 +185,10 @@ FText AStrikesCharacter::GetHealthIntText() const
 {
 	// Converts the health percentage to a formatted string showing the health as a percentage (e.g., "75%").
 
-	const int32 HP = FMath::RoundHalfFromZero(HealthPercentage * 100);
-	const FString HPS = FString::FromInt(HP);
-	const FString HealthHUD = HPS + FString(TEXT("%"));
-	const FText HPText = FText::FromString(HealthHUD);
+	int32 HP = FMath::RoundHalfFromZero(HealthPercentage * 100);
+	FString HPS = FString::FromInt(HP);
+	FString HealthHUD = HPS + FString(TEXT("%"));
+	FText HPText = FText::FromString(HealthHUD);
 
 	return HPText;
 }
@@ -239,10 +239,7 @@ void AStrikesCharacter::SetMagicState()
 	MagicValue = 0.f;
 
 	// Applies the default material to the weapon mesh if available.
-	if (GunDefaultMaterial)
-	{
-		Mesh1P->SetMaterial(0, GunDefaultMaterial);
-	}
+	TriggerOverheat(false);
 }
 
 
@@ -264,18 +261,21 @@ bool AStrikesCharacter::PlayFlash()
 }
 
 
-void AStrikesCharacter::ReceivePointDamage(float Damage, const UDamageType* DamageType, FVector HitLocation,
-                                           FVector HitNormal, UPrimitiveComponent* HitComponent, FName BoneName,
-                                           FVector ShotFromDirection,
-                                           AController* InstigatedBy, AActor* DamageCauser, const FHitResult& HitInfo)
+float AStrikesCharacter::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser
+)
 {
 	// Disables the ability to take damage and triggers a red flash effect.
 	// Updates health based on the damage received and starts a timer to re-enable damage capability.
-
 	bCanBeDamaged = false;
 	bRedFlash = true;
-	UpdateHealth(-Damage);
+	UpdateHealth(-DamageAmount);
 	DamageTimer();
+
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void AStrikesCharacter::UpdateHealth(const float HealthChange)
@@ -307,12 +307,19 @@ void AStrikesCharacter::SetMagicChange(const float MagicChange)
 	PreviousMagic = MagicPercentage;
 	MagicValue = (MagicChange / FullMagic);
 
-	// Sets the material to indicate the weapon is overheated if the material is available.
-	if (GunOverheatMaterial)
-	{
-		Mesh1P->SetMaterial(0, GunOverheatMaterial);
-	}
+	// Pass true or false based on whether it's overheating
+	TriggerOverheat(true);
 
 	// Starts the timeline to animate the change in magic value.
 	MyTimeline.PlayFromStart();
+}
+
+
+void AStrikesCharacter::TriggerOverheat(const bool bOverheat)
+{
+	/** Triggers an overheat event and broadcasts it if there are any listeners. */
+	if (OnOverheat.IsBound())
+	{
+		OnOverheat.Broadcast(bOverheat);
+	}
 }

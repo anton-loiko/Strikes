@@ -4,6 +4,7 @@
 
 #include "AsyncTreeDifferences.h"
 #include "StrikesCharacter.h"
+#include "StrikesHUD.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -14,6 +15,9 @@ AStrikesGameMode::AStrikesGameMode()
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(
 		TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
+
+	// Set the HUD class to use the custom AStrikesHUD class for the game's user interface.
+	HUDClass = AStrikesHUD::StaticClass();
 }
 
 void AStrikesGameMode::BeginPlay()

@@ -8,7 +8,7 @@
 
 class AStrikesCharacter;
 
-UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class STRIKES_API UTP_WeaponComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
@@ -21,7 +21,7 @@ public:
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Gameplay)
 	USoundBase* FireSound;
-	
+
 	/** AnimMontage to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	UAnimMontage* FireAnimation;
@@ -49,10 +49,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
 
+	/** Function to handle the overheat event */
+	UFUNCTION()
+	void OnOverheatEvent(bool bOverheat);
+
 protected:
 	/** Ends gameplay for this component. */
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	/**
+	 * Updates the weapon's material based on its overheat state.
+	 *
+	 * @param bOverheat A boolean indicating whether the weapon is overheating (true) or not (false).
+	 */
+	void SetOverheat(bool bOverheat);
 
 private:
 	/** The Character holding this weapon*/

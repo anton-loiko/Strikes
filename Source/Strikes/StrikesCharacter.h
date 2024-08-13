@@ -17,6 +17,8 @@ struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOverheat, bool, bOverheat);
+
 UCLASS(config=Game)
 class AStrikesCharacter : public ACharacter
 {
@@ -248,27 +250,12 @@ public:
 	UPROPERTY(EditAnywhere, Category="Magic")
 	UMaterialInterface* GunOverheatMaterial;
 
-	/**
-	 * Handles the application of point damage to the character.
-	 * 
-	 * @param Damage The amount of damage to apply.
-	 * @param DamageType Type of damage being applied.
-	 * @param HitLocation Location where the damage hit.
-	 * @param HitNormal Normal vector of the hit surface.
-	 * @param HitComponent Component that was hit.
-	 * @param BoneName Name of the bone that was hit.
-	 * @param ShotFromDirection Direction from which the shot was fired.
-	 * @param InstigatedBy The controller that caused the damage.
-	 * @param DamageCauser The actor that caused the damage.
-	 * @param HitInfo Information about the hit.
-	 */
-	// UFUNCTION()
-	void ReceivePointDamage(float Damage, const class UDamageType* DamageType, FVector HitLocation,
-	                        FVector HitNormal, class UPrimitiveComponent* HitComponent, FName BoneName,
-	                        FVector ShotFromDirection, class AController* InstigatedBy,
-	                        AActor* DamageCauser, const FHitResult& HitInfo
-
-	);
+	virtual float TakeDamage(
+		float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser
+	) override;
 
 	/**
 	 * Updates the health of the character based on the given change.
@@ -301,4 +288,11 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	// Delegate for overheat events
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnOverheat OnOverheat;
+
+	// Function to trigger overheat event
+	void TriggerOverheat(bool bOverheat);
 };
